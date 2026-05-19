@@ -1,0 +1,74 @@
+---
+- name: Perform compliance check on network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  vars:
+    compliance_rules_file: "{{ playbook_dir }}/compliance_rules/{{ ansible_network_os }}_rules.yml"
+
+  tasks:
+    - name: Ensure compliance_reports directory exists
+      file:
+        path: "./compliance_reports/{{ inventory_hostname }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Check if compliance rules file exists for the device OS
+      stat:
+        path: "{{ compliance_rules_file }}"
+      register: rules_file_stat
+      delegate_to: localhost
+
+    - name: Load compliance rules
+      include_vars:
+        file: "{{ compliance_rules_file }}"
+        name: compliance_rules
+      when: rules_file_stat.stat.exists
+
+    - name: Run compliance checks for Cisco devices
+      cisco.ios.ios_command:
+        commands: "{{ item.command }}"
+      loop: "{{ compliance_rules.cisco_checks | default([]) }}"
+      register: check_output
+      when: ansible_network_os == 'ios' and rules_file_stat.stat.exists
+
+    - name: Run compliance checks for MikroTik devices
+      community.routeros.api:
+        commands: "{{ item.command }}"
+      loop: "{{ compliance_rules.mikrotik_checks | default([]) }}"
+      register: check_output
+      when: ansible_network_os == 'community.routeros.routeros' and rules_file_stat.stat.exists
+
+    - name: Run compliance checks for Huawei devices
+      huawei.os.vrp_command:
+        commands: "{{ item.command }}"
+      loop: "{{ compliance_rules.huawei_checks | default([]) }}"
+      register: check_output
+      when: ansible_network_os == 'huawei.os.vrp' and rules_file_stat.stat.exists
+
+    - name: Run compliance checks for H3C devices
+      h3c.comware.comware_command:
+        commands: "{{ item.command }}"
+      loop: "{{ compliance_rules.h3c_checks | default([]) }}"
+      register: check_output
+      when: ansible_network_os == 'h3c.comware.comware' and rules_file_stat.stat.exists
+
+    - name: Run compliance checks for ZTE devices
+      zte.zxros.zxros_command:
+        commands: "{{ item.command }}"
+      loop: "{{ compliance_rules.zte_checks | default([]) }}"
+      register: check_output
+      when: ansible_network_os == 'zte.zxros.zxros' and rules_file_stat.stat.exists
+
+    - name: Evaluate compliance and save report
+      copy:
+        content: "Compliance Report for {{ inventory_hostname }}\n------------------------------------\n{% for item in check_output.results %}\nCommand: {{ item.item.command }}\nExpected: {{ item.item.expected_output }}\nActual: {{ item.stdout | join(\'\n\') }}\nStatus: {% if item.stdout | join(\'\n\') is search(item.item.expected_output) %}COMPLIANT{% else %}NON-COMPLIANT{% endif %}\n\n{% endfor %}"
+        dest: "./compliance_reports/{{ inventory_hostname }}/{{ inventory_hostname }}_compliance_{{ ansible_date_time.iso8601 }}.txt"
+      delegate_to: localhost
+      when: rules_file_stat.stat.exists and check_output is defined and check_output.results is defined
+
+    - name: Inform if no compliance rules found
+      debug:
+        msg: "No compliance rules file found for {{ ansible_network_os }} at {{ compliance_rules_file }}. Skipping compliance check."
+      when: not rules_file_stat.stat.exists

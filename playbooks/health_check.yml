@@ -1,0 +1,67 @@
+---
+- name: Perform health check on network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Ensure health_check directory exists
+      file:
+        path: "./health_checks/{{ inventory_hostname }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Run health check commands for Cisco devices
+      cisco.ios.ios_command:
+        commands:
+          - 'show version'
+          - 'show cpu process history'
+          - 'show memory statistics'
+          - 'show environment'
+      register: health_check_output
+      when: ansible_network_os == 'ios'
+
+    - name: Run health check commands for MikroTik devices
+      community.routeros.api:
+        commands:
+          - '/system resource print'
+          - '/system health print'
+      register: health_check_output
+      when: ansible_network_os == 'community.routeros.routeros'
+
+    - name: Run health check commands for Huawei devices
+      huawei.os.vrp_command:
+        commands:
+          - 'display version'
+          - 'display cpu'
+          - 'display memory'
+          - 'display environment'
+      register: health_check_output
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Run health check commands for H3C devices
+      h3c.comware.comware_command:
+        commands:
+          - 'display version'
+          - 'display cpu'
+          - 'display memory'
+          - 'display environment'
+      register: health_check_output
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Run health check commands for ZTE devices
+      zte.zxros.zxros_command:
+        commands:
+          - 'show version'
+          - 'show cpu'
+          - 'show memory'
+          - 'show environment'
+      register: health_check_output
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Save health check output to file
+      copy:
+        content: "{{ health_check_output.stdout | join('\n') }}"
+        dest: "./health_checks/{{ inventory_hostname }}/{{ inventory_hostname }}_health_{{ ansible_date_time.iso8601 }}.txt"
+      delegate_to: localhost
+      when: health_check_output is defined and health_check_output.stdout is defined and health_check_output.stdout | length > 0

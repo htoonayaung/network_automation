@@ -1,0 +1,8 @@
+---
+ansible_user: ansible_admin
+ansible_password: your_password
+ansible_become: yes
+ansible_become_method: enable
+ansible_become_pass: your_enable_password
+ansible_python_interpreter: /usr/bin/python3
+ansible_network_cli_ssh_type: libssh

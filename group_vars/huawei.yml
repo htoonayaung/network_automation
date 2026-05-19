@@ -1,0 +1,5 @@
+---
+ansible_network_os: huawei.os.vrp
+ansible_user: huawei_user
+ansible_password: "{{ vault_huawei_password }}"
+ansible_become_pass: "{{ vault_huawei_enable_password }}"

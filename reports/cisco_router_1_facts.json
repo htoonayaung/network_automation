@@ -1,0 +1,41 @@
+{
+    "ansible_facts": {
+        "ansible_net_hostname": "cisco_router_1",
+        "ansible_net_model": "Cisco IOSv",
+        "ansible_net_version": "15.9(3)M",
+        "ansible_net_serialnum": "9Q300099999",
+        "ansible_net_interfaces": {
+            "GigabitEthernet0/0": {
+                "description": "Uplink to Core",
+                "mtu": 1500,
+                "speed": 1000,
+                "duplex": "Full",
+                "macaddress": "0050.56b0.1234",
+                "ipv4": [
+                    {
+                        "address": "192.168.1.1",
+                        "subnet": "24"
+                    }
+                ],
+                "admin_state": "up",
+                "oper_state": "up"
+            },
+            "Loopback0": {
+                "description": "Management Interface",
+                "mtu": 1514,
+                "speed": -1,
+                "duplex": "unknown",
+                "macaddress": "0000.0000.0000",
+                "ipv4": [
+                    {
+                        "address": "1.1.1.1",
+                        "subnet": "32"
+                    }
+                ],
+                "admin_state": "up",
+                "oper_state": "up"
+            }
+        }
+    },
+    "changed": false
+}

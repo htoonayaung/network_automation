@@ -1,0 +1,5 @@
+mikrotik_checks:
+  - command: "/system identity print"
+    expected_output: "name: MyMikrotikDevice"
+  - command: "/system ntp client print"
+    expected_output: "enabled: yes primary-ntp: 1.pool.ntp.org"

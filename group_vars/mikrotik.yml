@@ -1,0 +1,4 @@
+---
+ansible_network_os: community.routeros.routeros
+ansible_user: mikrotik_user
+ansible_password: "{{ vault_mikrotik_password }}"

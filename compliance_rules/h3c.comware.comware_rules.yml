@@ -1,0 +1,5 @@
+h3c_checks:
+  - command: "display current-configuration | include sysname"
+    expected_output: "sysname MyH3CDevice"
+  - command: "display ntp-service status | include Clock status"
+    expected_output: "Clock status: synchronized"

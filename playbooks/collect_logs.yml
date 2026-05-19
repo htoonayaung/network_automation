@@ -1,0 +1,54 @@
+---
+- name: Collect logs from network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Ensure log directory exists
+      file:
+        path: "./logs/{{ inventory_hostname }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Collect logs from Cisco devices
+      cisco.ios.ios_command:
+        commands:
+          - 'show logging'
+      register: log_output
+      when: ansible_network_os == 'ios'
+
+    - name: Collect logs from MikroTik devices
+      community.routeros.api:
+        commands:
+          - '/log print'
+      register: log_output
+      when: ansible_network_os == 'community.routeros.routeros'
+
+    - name: Collect logs from Huawei devices
+      huawei.os.vrp_command:
+        commands:
+          - 'display logbuffer'
+      register: log_output
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Collect logs from H3C devices
+      h3c.comware.comware_command:
+        commands:
+          - 'display logbuffer'
+      register: log_output
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Collect logs from ZTE devices
+      zte.zxros.zxros_command:
+        commands:
+          - 'show logbuffer'
+      register: log_output
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Save collected logs to file
+      copy:
+        content: "{{ log_output.stdout[0] | default('') }}"
+        dest: "./logs/{{ inventory_hostname }}/{{ inventory_hostname }}_logs_{{ ansible_date_time.iso8601 }}.log"
+      delegate_to: localhost
+      when: log_output is defined and log_output.stdout is defined and log_output.stdout | length > 0

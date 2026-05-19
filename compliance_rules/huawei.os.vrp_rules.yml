@@ -1,0 +1,5 @@
+huawei_checks:
+  - command: "display current-configuration | include sysname"
+    expected_output: "sysname MyHuaweiDevice"
+  - command: "display ntp-service status | include Clock status"
+    expected_output: "Clock status: synchronized"

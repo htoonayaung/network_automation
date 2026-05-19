@@ -1,0 +1,7 @@
+---
+- name: Configure NTP for Cisco IOS
+  cisco.ios.ios_config:
+    lines:
+      - ntp server {{ ntp_server_primary }}
+      - ntp server {{ ntp_server_secondary }}
+    save_when: modified

@@ -1,0 +1,7 @@
+---
+- name: Configure NTP for Huawei VRP
+  huawei.os.vrp_config:
+    lines:
+      - ntp-service unicast-server {{ ntp_server_primary }}
+      - ntp-service unicast-server {{ ntp_server_secondary }}
+    save_when: modified

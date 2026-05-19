@@ -1,0 +1,55 @@
+---
+- name: Collect interface status from network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Ensure interface_status directory exists
+      file:
+        path: "./interface_status/{{ inventory_hostname }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Get interface status for Cisco devices
+      cisco.ios.ios_command:
+        commands:
+          - 'show ip interface brief'
+          - 'show interface status'
+      register: interface_status_output
+      when: ansible_network_os == 'ios'
+
+    - name: Get interface status for MikroTik devices
+      community.routeros.api:
+        commands:
+          - '/interface print status'
+      register: interface_status_output
+      when: ansible_network_os == 'community.routeros.routeros'
+
+    - name: Get interface status for Huawei devices
+      huawei.os.vrp_command:
+        commands:
+          - 'display interface brief'
+      register: interface_status_output
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Get interface status for H3C devices
+      h3c.comware.comware_command:
+        commands:
+          - 'display interface brief'
+      register: interface_status_output
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Get interface status for ZTE devices
+      zte.zxros.zxros_command:
+        commands:
+          - 'show interface brief'
+      register: interface_status_output
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Save interface status output to file
+      copy:
+        content: "{{ interface_status_output.stdout | join('\n') }}"
+        dest: "./interface_status/{{ inventory_hostname }}/{{ inventory_hostname }}_interfaces_{{ ansible_date_time.iso8601 }}.txt"
+      delegate_to: localhost
+      when: interface_status_output is defined and interface_status_output.stdout is defined and interface_status_output.stdout | length > 0

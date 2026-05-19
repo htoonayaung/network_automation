@@ -1,0 +1,17 @@
+---
+- name: Gather Cisco device facts and save to JSON
+  hosts: cisco
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Gather Cisco IOS facts
+      cisco.ios.ios_facts:
+        gather_subset: all
+      register: cisco_facts
+
+    - name: Save Cisco facts to JSON file
+      copy:
+        content: "{{ cisco_facts | to_nice_json }}"
+        dest: "./reports/{{ inventory_hostname }}_facts.json"
+      delegate_to: localhost

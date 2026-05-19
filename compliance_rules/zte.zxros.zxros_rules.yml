@@ -1,0 +1,5 @@
+zte_checks:
+  - command: "show running-config | include hostname"
+    expected_output: "hostname MyZTEDevice"
+  - command: "show ntp status | include Clock status"
+    expected_output: "Clock status: synchronized"

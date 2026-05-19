@@ -1,0 +1,103 @@
+---
+- name: Upgrade firmware on network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  vars:
+    firmware_image_path: "/path/to/firmware/images/"
+    firmware_image_name: "{{ inventory_hostname }}_firmware.bin"
+
+  tasks:
+    - name: Upload firmware image to Cisco devices
+      cisco.ios.ios_file_transfer:
+        source: "{{ firmware_image_path }}{{ firmware_image_name }}"
+        dest: "flash:/{{ firmware_image_name }}"
+        direction: put
+      when: ansible_network_os == 'ios'
+
+    - name: Set boot image for Cisco devices
+      cisco.ios.ios_config:
+        lines:
+          - "boot system flash:/{{ firmware_image_name }}"
+        save_when: modified
+      when: ansible_network_os == 'ios'
+
+    - name: Upload firmware image to Huawei devices
+      huawei.os.vrp_file_transfer:
+        source: "{{ firmware_image_path }}{{ firmware_image_name }}"
+        dest: "flash:/{{ firmware_image_name }}"
+        direction: put
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Set boot image for Huawei devices
+      huawei.os.vrp_config:
+        lines:
+          - "boot-loader file flash:/{{ firmware_image_name }} system"
+        save_when: modified
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Upload firmware image to H3C devices
+      h3c.comware.comware_file_transfer:
+        source: "{{ firmware_image_path }}{{ firmware_image_name }}"
+        dest: "flash:/{{ firmware_image_name }}"
+        direction: put
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Set boot image for H3C devices
+      h3c.comware.comware_config:
+        lines:
+          - "boot-loader file flash:/{{ firmware_image_name }} system"
+        save_when: modified
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Upload firmware image to ZTE devices
+      zte.zxros.zxros_file_transfer:
+        source: "{{ firmware_image_path }}{{ firmware_image_name }}"
+        dest: "flash:/{{ firmware_image_name }}"
+        direction: put
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Set boot image for ZTE devices
+      zte.zxros.zxros_config:
+        lines:
+          - "boot-loader file flash:/{{ firmware_image_name }} system"
+        save_when: modified
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Reboot device (optional, uncomment with caution)
+      # cisco.ios.ios_command:
+      #   commands:
+      #     - 'reload'
+      #   prompt: 'Proceed with reload\? \[confirm\]'
+      #   answer: 'y'
+      # when: ansible_network_os == 'ios'
+
+    - name: Reboot device (optional, uncomment with caution)
+      # huawei.os.vrp_command:
+      #   commands:
+      #     - 'reboot'
+      #   prompt: 'Reboot system\? \[Y/N\]'
+      #   answer: 'Y'
+      # when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Reboot device (optional, uncomment with caution)
+      # h3c.comware.comware_command:
+      #   commands:
+      #     - 'reboot'
+      #   prompt: 'Reboot system\? \[Y/N\]'
+      #   answer: 'Y'
+      # when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Reboot device (optional, uncomment with caution)
+      # zte.zxros.zxros_command:
+      #   commands:
+      #     - 'reboot'
+      #   prompt: 'Reboot system\? \[Y/N\]'
+      #   answer: 'Y'
+      # when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Firmware upgrade for MikroTik devices (manual steps or custom script might be needed)
+      debug:
+        msg: "MikroTik firmware upgrade often requires specific steps. Please refer to MikroTik documentation or create a custom script for this."
+      when: ansible_network_os == 'community.routeros.routeros'

@@ -1,0 +1,5 @@
+cisco_checks:
+  - command: "show running-config | include hostname"
+    expected_output: "hostname MyCiscoDevice"
+  - command: "show running-config | include ntp server"
+    expected_output: "ntp server 1.pool.ntp.org"

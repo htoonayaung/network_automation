@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Device Report - {{ hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .section { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Network Device Report: {{ hostname }}</h1>
+
+    <div class="section">
+        <h2>Device Information</h2>
+        <table>
+            <tr><th>Hostname</th><td>{{ hostname }}</td></tr>
+            <tr><th>Model</th><td>{{ model }}</td></tr>
+            <tr><th>Version</th><td>{{ version }}</td></tr>
+            <tr><th>Serial Number</th><td>{{ serial_number }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Interfaces</h2>
+        <table>
+            <tr>
+                <th>Interface</th>
+                <th>Description</th>
+                <th>IP Address</th>
+                <th>MTU</th>
+                <th>Speed</th>
+                <th>Duplex</th>
+                <th>MAC Address</th>
+                <th>Admin State</th>
+                <th>Oper State</th>
+            </tr>
+            {% for iface_name, iface_data in interfaces.items() %}
+            <tr>
+                <td>{{ iface_name }}</td>
+                <td>{{ iface_data.description | default("N/A") }}</td>
+                <td>
+                    {% if iface_data.ipv4 %}
+                        {% for ip in iface_data.ipv4 %}
+                            {{ ip.address }}/{{ ip.subnet }}<br>
+                        {% endfor %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ iface_data.mtu | default("N/A") }}</td>
+                <td>{{ iface_data.speed | default("N/A") }}</td>
+                <td>{{ iface_data.duplex | default("N/A") }}</td>
+                <td>{{ iface_data.macaddress | default("N/A") }}</td>
+                <td>{{ iface_data.admin_state | default("N/A") }}</td>
+                <td>{{ iface_data.oper_state | default("N/A") }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+---
+ansible_network_os: ios
+ansible_user: cisco_user
+ansible_password: "{{ vault_cisco_password }}"
+ansible_become_pass: "{{ vault_cisco_enable_password }}"

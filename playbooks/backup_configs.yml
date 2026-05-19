@@ -1,0 +1,57 @@
+---
+- name: Backup network device configurations
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Ensure backup directory exists
+      file:
+        path: "./backups/{{ inventory_hostname }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Get running configuration for Cisco devices
+      cisco.ios.ios_facts:
+        gather_subset: all
+      register: config_output
+      when: ansible_network_os == 'ios'
+
+    - name: Get running configuration for MikroTik devices
+      community.routeros.api:
+        commands:
+          - '/export compact'
+      register: config_output
+      when: ansible_network_os == 'community.routeros.routeros'
+
+    - name: Get running configuration for Huawei devices
+      huawei.os.vrp_facts:
+        gather_subset: all
+      register: config_output
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Get running configuration for H3C devices
+      h3c.comware.comware_facts:
+        gather_subset: all
+      register: config_output
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Get running configuration for ZTE devices
+      zte.zxros.zxros_facts:
+        gather_subset: all
+      register: config_output
+      when: ansible_network_os == 'zte.zxros.zxros'
+
+    - name: Save configuration to file for Cisco, Huawei, H3C, ZTE
+      copy:
+        content: "{{ config_output.ansible_facts.ansible_net_config }}"
+        dest: "./backups/{{ inventory_hostname }}/{{ inventory_hostname }}_{{ ansible_date_time.iso8601 }}.cfg"
+      delegate_to: localhost
+      when: ansible_network_os in ['ios', 'huawei.os.vrp', 'h3c.comware.comware', 'zte.zxros.zxros']
+
+    - name: Save configuration to file for MikroTik
+      copy:
+        content: "{{ config_output.stdout[0] }}"
+        dest: "./backups/{{ inventory_hostname }}/{{ inventory_hostname }}_{{ ansible_date_time.iso8601 }}.cfg"
+      delegate_to: localhost
+      when: ansible_network_os == 'community.routeros.routeros'

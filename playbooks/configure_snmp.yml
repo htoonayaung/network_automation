@@ -1,0 +1,42 @@
+---
+- name: Configure SNMP on network devices
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Configure SNMP for Cisco devices
+      cisco.ios.ios_config:
+        lines:
+          - snmp-server community public RO
+          - snmp-server enable traps
+      when: ansible_network_os == 'ios'
+
+    - name: Configure SNMP for MikroTik devices
+      community.routeros.api:
+        commands:
+          - '/snmp community add name=public read-only=yes'
+          - '/snmp set enabled=yes trap-target=192.168.1.254 trap-community=public'
+      when: ansible_network_os == 'community.routeros.routeros'
+
+    - name: Configure SNMP for Huawei devices
+      huawei.os.vrp_config:
+        lines:
+          - snmp-agent community read cipher public
+          - snmp-agent sys-info version all
+          - snmp-agent trap enable
+      when: ansible_network_os == 'huawei.os.vrp'
+
+    - name: Configure SNMP for H3C devices
+      h3c.comware.comware_config:
+        lines:
+          - snmp-agent community read public
+          - snmp-agent trap enable
+      when: ansible_network_os == 'h3c.comware.comware'
+
+    - name: Configure SNMP for ZTE devices
+      zte.zxros.zxros_config:
+        lines:
+          - snmp-agent community read public
+          - snmp-agent trap enable
+      when: ansible_network_os == 'zte.zxros.zxros'

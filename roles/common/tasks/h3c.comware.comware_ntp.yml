@@ -1,0 +1,7 @@
+---
+- name: Configure NTP for H3C Comware
+  h3c.comware.comware_config:
+    lines:
+      - ntp-service unicast-server {{ ntp_server_primary }}
+      - ntp-service unicast-server {{ ntp_server_secondary }}
+    save_when: modified

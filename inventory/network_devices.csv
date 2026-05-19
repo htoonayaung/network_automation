@@ -1,0 +1,5 @@
+Hostname,Ansible_Host,Vendor,Layer
+Building_1,10.0.0.1,cisco,distribution
+Building_2,10.0.0.2,cisco,distribution
+
+

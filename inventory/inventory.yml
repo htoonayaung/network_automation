@@ -1,0 +1,22 @@
+all:
+  vars:
+    ansible_user: ansible_automation_user
+    ansible_password: '"{{ vault_ansible_password }}"'
+    ansible_become: 'yes'
+    ansible_become_method: enable
+    ansible_become_pass: '"{{ vault_ansible_enable_password }}"'
+    ansible_network_cli_ssh_type: libssh
+    ansible_command_timeout: 30
+  children:
+    core:
+      children: {}
+    distribution:
+      children:
+        cisco_distribution:
+          hosts:
+            Building_1:
+              ansible_host: 10.0.0.1
+            Building_2:
+              ansible_host: 10.0.0.2
+    access:
+      children: {}

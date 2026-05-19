@@ -1,0 +1,5 @@
+---
+- name: Configure NTP for MikroTik RouterOS
+  community.routeros.api:
+    commands:
+      - "/system ntp client set enabled=yes primary-ntp={{ ntp_server_primary }} secondary-ntp={{ ntp_server_secondary }}"

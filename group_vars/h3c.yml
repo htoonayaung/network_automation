@@ -1,0 +1,5 @@
+---
+ansible_network_os: h3c.comware.comware
+ansible_user: h3c_user
+ansible_password: "{{ vault_h3c_password }}"
+ansible_become_pass: "{{ vault_h3c_enable_password }}"

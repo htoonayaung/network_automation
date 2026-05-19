@@ -1,0 +1,4 @@
+---
+- name: Configure NTP on network devices
+  ansible.builtin.include_tasks: "{{ ansible_network_os }}_ntp.yml"
+  when: ansible_network_os in ["ios", "community.routeros.routeros", "huawei.os.vrp", "h3c.comware.comware", "zte.zxros.zxros"]
